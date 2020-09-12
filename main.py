@@ -13,7 +13,7 @@ def cls():
 class LouisVuittonAPI(object):
     def __init__(self, region, browser):
         cls()
-        print "Louis Vuitton API by Luke Davis (@R8T3D)"
+        print("Louis Vuitton API by Luke Davis (@R8T3D)")
         print "="*60
         self.s = requests.Session()
         self.browser = browser
@@ -40,15 +40,15 @@ class LouisVuittonAPI(object):
         }
 
         try:
-            self.lv_base_url = self.region_to_url[region.upper()]
-            self.lv_lang = self.region_to_lang[region.upper()]
+            self.lv_base_url = self.region_to_url[region.strip().upper()]
+            self.lv_lang = self.region_to_lang[region.strip().upper()]
         except:
             print "Invalid region, correct your spelling or add it."
             raise ValueError('Invalid region')
 
         if browser:
-            self.driver = webdriver.Chrome()
-            self.driver.get("http://" + self.lv_base_url)
+            self.driver = webdriver.Firefox()
+            self.driver.get("https://" + self.lv_base_url)
             cookies = self.driver.get_cookies()
             for cookie in cookies:
                 self.s.cookies.set(cookie['name'], cookie['value'])
@@ -136,11 +136,11 @@ class LouisVuittonAPI(object):
             is in stock.
         """
 
-        sku = sku.upper()
+        sku = sku.strip().upper()
         print "Getting stock status for " + sku + "..."
 
         stock_url = "https://secure.louisvuitton.com/ajaxsecure/getStockLevel.jsp?storeLang=" + self.lv_lang + "&pageType=product&skuIdList=" + sku
-
+        self.driver.get(stock_url)
         stock_json_raw = self.s.get(stock_url).text.strip()
         stock_json = json.loads(stock_json_raw)
 
@@ -229,9 +229,12 @@ if __name__ == '__main__':
 
     lv = LouisVuittonAPI(region, browser)
 
-    choice = raw_input("What would you like to do? \n(ATC or INFO) ")
+    choice = raw_input("What would you like to do? \n(ATC, STOCK, or INFO) ")
     sku = raw_input("SKU? ")
-    if choice.upper() == "ATC":
+    choice = choice.strip().upper()
+    if choice == "ATC":
         lv.add_to_cart(sku)
+    elif choice == "STOCK":
+        lv.get_stock_status(sku)
     else:
         lv.get_product_info(sku)
