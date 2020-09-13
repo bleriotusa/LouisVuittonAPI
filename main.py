@@ -22,6 +22,7 @@ class LouisVuittonAPI(object):
         self.region_to_url = {
         'UK': 'uk.louisvuitton.com',
         'US': 'us.louisvuitton.com',
+        'CA': 'ca.louisvuitton.com',
         'AU': 'au.louisvuitton.com',
         'HK': 'hk.louisvuitton.com',
         'EU': 'eu.louisvuitton.com',
@@ -36,7 +37,8 @@ class LouisVuittonAPI(object):
         'HK': 'eng-hk',
         'EU': 'eng-e1',
         'KR': 'kor-kr',
-        'JP': 'jpn-jp'
+        'JP': 'jpn-jp',
+        'CA': 'eng-ca'
         }
 
         try:
@@ -50,6 +52,7 @@ class LouisVuittonAPI(object):
             self.driver = webdriver.Firefox()
             self.driver.get("https://" + self.lv_base_url)
             cookies = self.driver.get_cookies()
+            # print cookies
             for cookie in cookies:
                 self.s.cookies.set(cookie['name'], cookie['value'])
         else:
@@ -140,8 +143,11 @@ class LouisVuittonAPI(object):
         print "Getting stock status for " + sku + "..."
 
         stock_url = "https://secure.louisvuitton.com/ajaxsecure/getStockLevel.jsp?storeLang=" + self.lv_lang + "&pageType=product&skuIdList=" + sku
+        self.driver.delete_all_cookies()
         self.driver.get(stock_url)
-        stock_json_raw = self.s.get(stock_url).text.strip()
+        element = self.driver.find_element_by_tag_name('body')
+        stock_json_raw = element.text
+        # stock_json_raw = self.s.get(stock_url).text.strip()
         stock_json = json.loads(stock_json_raw)
 
         if stock_json[sku]['inStock']:
@@ -219,22 +225,27 @@ if __name__ == '__main__':
     print "Louis Vuitton API by Luke Davis (@R8T3D)"
     print "="*60
 
-    browser = raw_input("Browser? (Y/N) ")
+    # browser = raw_input("Browser? (Y/N) ")
 
-    region = raw_input("Region? Options: US,UK,JP,EU,AU,KR,")
-    if browser.upper() == "Y":
+    # region = raw_input("Region? Options: US,UK,JP,EU,AU,KR,CA")
+    browser = "Y"
+    region = "CA"
+    if browser.strip().upper() == "Y":
         browser = True
     else:
         browser = False
 
     lv = LouisVuittonAPI(region, browser)
 
-    choice = raw_input("What would you like to do? \n(ATC, STOCK, or INFO) ")
-    sku = raw_input("SKU? ")
+    # choice = raw_input("What would you like to do? \n(ATC, STOCK, or INFO) ")
+    # sku = raw_input("SKU? ")
+
+    choice = "STOCK"
+    sku = 'M40712'
     choice = choice.strip().upper()
     if choice == "ATC":
         lv.add_to_cart(sku)
     elif choice == "STOCK":
-        lv.get_stock_status(sku)
+        print "In Stock: " + str(lv.get_stock_status(sku))
     else:
         lv.get_product_info(sku)
