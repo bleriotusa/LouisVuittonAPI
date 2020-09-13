@@ -14,8 +14,13 @@ class LouisVuittonAPI(object):
     def __init__(self, region, browser):
         cls()
         print("Louis Vuitton API by Luke Davis (@R8T3D)")
-        print "="*60
+        print( "="*60)
         self.s = requests.Session()
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0',
+            'Connection': 'keep-alive'
+        }
+        self.s.headers.update(headers)
         self.browser = browser
 
         # I can't be asked to add more regions, do that yourself.
@@ -45,7 +50,7 @@ class LouisVuittonAPI(object):
             self.lv_base_url = self.region_to_url[region.strip().upper()]
             self.lv_lang = self.region_to_lang[region.strip().upper()]
         except:
-            print "Invalid region, correct your spelling or add it."
+            print("Invalid region, correct your spelling or add it.")
             raise ValueError('Invalid region')
 
         if browser:
@@ -56,10 +61,11 @@ class LouisVuittonAPI(object):
             for cookie in cookies:
                 self.s.cookies.set(cookie['name'], cookie['value'])
         else:
-            self.s.get("http://" + self.lv_base_url)
+            self.s.get("https://" + self.lv_base_url + "/eng-ca/homepage")
+            # response = requests.get("https://" + self.lv_base_url + "/eng-ca/homepage")
 
-        print "Region: " + region.upper()
-        print "="*60
+        print( "Region: " + region.upper())
+        print( "="*60)
 
     def get_product_info(self, sku):
         """
@@ -70,8 +76,8 @@ class LouisVuittonAPI(object):
         """
 
         sku = sku.upper()
-        print "Getting product info for " + sku + "..."
-        print " "
+        print( "Getting product info for " + sku + "...")
+        print( " ")
 
         info_url = "http://" + self.lv_base_url + "/ajax/product.jsp?storeLang=" + self.lv_lang + "&pageType=product&id=" + sku
 
@@ -86,21 +92,21 @@ class LouisVuittonAPI(object):
             display = True
         except:
             display = False
-            print "Product couldn't be found."
+            print( "Product couldn't be found.")
 
         stock = self.get_stock_status(sku)
         
         if display:
-            print "Product Info:"
-            print "-"*40
-            print "SKU: " + sku
-            print "PID: " + product_pid
-            print "Name: " + product_name
-            print "Price: " + product_price
-            print "Description: " + product_description
-            print "Image URL: " + product_image
-            print "Available: " + str(stock)
-            print "-"*40
+            print( "Product Info:")
+            print( "-"*40)
+            print( "SKU: " + sku)
+            print( "PID: " + product_pid)
+            print( "Name: " + product_name)
+            print( "Price: " + product_price)
+            print( "Description: " + product_description)
+            print( "Image URL: " + product_image)
+            print( "Available: " + str(stock))
+            print( "-"*40)
 
         if stock:
             choice = raw_input("Product appears to be in stock. \nAttempt to add product to cart? (Y/N) ")
@@ -117,7 +123,7 @@ class LouisVuittonAPI(object):
         """
 
         sku = sku.upper()
-        print "Getting PID for " + sku + "..."
+        print( "Getting PID for " + sku + "...")
 
         info_url = "http://" + self.lv_base_url + "/ajax/product.jsp?storeLang=" + self.lv_lang + "&pageType=product&id=" + sku
 
@@ -140,14 +146,17 @@ class LouisVuittonAPI(object):
         """
 
         sku = sku.strip().upper()
-        print "Getting stock status for " + sku + "..."
+        print( "Getting stock status for " + sku + "...")
 
         stock_url = "https://secure.louisvuitton.com/ajaxsecure/getStockLevel.jsp?storeLang=" + self.lv_lang + "&pageType=product&skuIdList=" + sku
-        self.driver.delete_all_cookies()
-        self.driver.get(stock_url)
-        element = self.driver.find_element_by_tag_name('body')
-        stock_json_raw = element.text
-        # stock_json_raw = self.s.get(stock_url).text.strip()
+        if self.browser:
+            self.driver.delete_all_cookies()
+            self.driver.get(stock_url)
+            element = self.driver.find_element_by_tag_name('body')
+            stock_json_raw = element.text
+        else:
+            stock_json_raw = self.s.get(stock_url).text.strip()
+            
         stock_json = json.loads(stock_json_raw)
 
         if stock_json[sku]['inStock']:
@@ -166,13 +175,13 @@ class LouisVuittonAPI(object):
         pid = self.get_pid(sku)
 
         if self.get_stock_status(sku):
-            print sku + " is available."
+            print( sku + " is available.")
             cart = True
         else:
-            print sku + " is NOT available."
+            print( sku + " is NOT available.")
             cart = False
 
-        print "Attempting to ATC..."
+        print( "Attempting to ATC...")
 
         headers = {
             'Origin': 'http://' + self.lv_base_url,
@@ -215,20 +224,20 @@ class LouisVuittonAPI(object):
 
             if self.browser:
                 self.driver.get("http://uk.louisvuitton.com/" + self.lv_lang + "/cart")
-                raw_input()
+                input()
             else:
-                print "Status Code: " +  str(ATC.status_code)
-                print "ATC success."
+                print( "Status Code: " +  str(ATC.status_code))
+                print( "ATC success.")
 
 if __name__ == '__main__':
     cls()
-    print "Louis Vuitton API by Luke Davis (@R8T3D)"
-    print "="*60
+    print( "Louis Vuitton API by Luke Davis (@R8T3D)")
+    print( "="*60)
 
     # browser = raw_input("Browser? (Y/N) ")
 
     # region = raw_input("Region? Options: US,UK,JP,EU,AU,KR,CA")
-    browser = "Y"
+    browser = "N"
     region = "CA"
     if browser.strip().upper() == "Y":
         browser = True
@@ -246,6 +255,6 @@ if __name__ == '__main__':
     if choice == "ATC":
         lv.add_to_cart(sku)
     elif choice == "STOCK":
-        print "In Stock: " + str(lv.get_stock_status(sku))
+        print( "In Stock: " + str(lv.get_stock_status(sku)))
     else:
         lv.get_product_info(sku)
