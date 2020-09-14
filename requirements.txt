@@ -1,14 +1,17 @@
 # DO NOT include azure-functions-worker in this file
 # The Python Worker is managed by Azure Functions platform
 # Manually managing azure-functions-worker may cause unexpected issues
+--extra-index-url https://testpypi.python.org/pypi
 
 azure-functions
+azure-identity
 beautifulsoup4==4.6.0
 bs4==0.0.1
 certifi==2017.4.17
 chardet==3.0.4
 idna==2.5
-lxml==3.8.0
-requests==2.20.0
-selenium==3.4.3
+lxml==4.5.2
+msgraphcore
+requests==2.24.0
+selenium==3.141.0
 urllib3==1.24.2

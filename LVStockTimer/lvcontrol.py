@@ -109,7 +109,7 @@ class LouisVuittonAPI(object):
             print( "-"*40)
 
         if stock:
-            choice = raw_input("Product appears to be in stock. \nAttempt to add product to cart? (Y/N) ")
+            choice = input("Product appears to be in stock. \nAttempt to add product to cart? (Y/N) ")
             if choice.upper() == "Y":
                 self.add_to_cart(sku)
 
