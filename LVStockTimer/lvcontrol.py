@@ -133,7 +133,7 @@ class LouisVuittonAPI(object):
 
         return pid
 
-    def get_stock_status(self, sku):
+    def get_stock_status(self, sku, logging):
         """
         Checks a product's inventory status.
 
@@ -155,7 +155,10 @@ class LouisVuittonAPI(object):
             element = self.driver.find_element_by_tag_name('body')
             stock_json_raw = element.text
         else:
-            stock_json_raw = self.s.get(stock_url).text.strip()
+            response =  self.s.get(stock_url)
+            logging.info(response.content)
+            stock_json_raw = response.text.strip()
+
             
         stock_json = json.loads(stock_json_raw)
 

@@ -30,10 +30,11 @@ def main(mytimer: func.TimerRequest) -> None:
     if choice == "ATC":
         lv.add_to_cart(sku)
     elif choice == "STOCK":
-        status = lv.get_stock_status(sku)
-        logging.info( "In Stock: " + str(status))
+        status = lv.get_stock_status(sku, logging)
+        logging.info( sku + " in Stock: " + str(status))
         if status:
             mail_helper.send_smtp()
+            logging.info("Sent mail")
     else:
         lv.get_product_info(sku)
 
